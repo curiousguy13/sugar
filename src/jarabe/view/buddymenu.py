@@ -192,7 +192,7 @@ class BuddyMenu(Palette):
             try:
                 service.InviteContact(self._buddy.props.account,
                                       self._buddy.props.contact_id)
-            except dbus.DBusException, e:
+            except dbus.DBusException as e:
                 expected_exceptions = [
                     'org.freedesktop.DBus.Error.UnknownMethod',
                     'org.freedesktop.DBus.Python.NotImplementedError']

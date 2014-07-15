@@ -179,12 +179,12 @@ class BundleRegistry(GObject.GObject):
                 if not isinstance(favorite_bundles, dict):
                     raise ValueError('Invalid format in %s.' % favorites_path)
                 if favorite_bundles:
-                    first_key = favorite_bundles.keys()[0]
-                    if not isinstance(first_key, basestring):
+                    first_key = list(favorite_bundles.keys())[0]
+                    if not isinstance(first_key, str):
                         raise ValueError('Invalid format in %s.' %
                                          favorites_path)
 
-                    first_value = favorite_bundles.values()[0]
+                    first_value = list(favorite_bundles.values())[0]
                     if first_value is not None and \
                        not isinstance(first_value, dict):
                         raise ValueError('Invalid format in %s.' %
@@ -262,7 +262,7 @@ class BundleRegistry(GObject.GObject):
                 logging.exception('Error while processing installed activity'
                                   ' bundle %s:', bundle_dir)
 
-        bundle_dirs = bundles.keys()
+        bundle_dirs = list(bundles.keys())
         bundle_dirs.sort(lambda d1, d2: cmp(bundles[d1], bundles[d2]))
         for folder in bundle_dirs:
             try:
@@ -626,7 +626,7 @@ class _InstallQueue(object):
 
         try:
             task.queue_callback(bundle.install())
-        except Exception, e:
+        except Exception as e:
             logging.debug("InstallThread install failed: %r", e)
             task.queue_callback(e)
 

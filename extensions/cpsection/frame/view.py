@@ -181,7 +181,7 @@ class Frame(SectionView):
             return
         try:
             self._model.set_corner_delay(scale.get_value())
-        except ValueError, detail:
+        except ValueError as detail:
             self._corner_delay_alert.props.msg = detail
             self._corner_delay_is_valid = False
         else:
@@ -214,7 +214,7 @@ class Frame(SectionView):
             return
         try:
             self._model.set_edge_delay(scale.get_value())
-        except ValueError, detail:
+        except ValueError as detail:
             self._edge_delay_alert.props.msg = detail
             self._edge_delay_is_valid = False
         else:

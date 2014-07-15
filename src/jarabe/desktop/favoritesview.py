@@ -375,7 +375,7 @@ class FavoritesView(ViewContainer):
         alert = Alert()
         try:
             schoolserver.register_laptop()
-        except RegisterError, e:
+        except RegisterError as e:
             alert.props.title = _('Registration Failed')
             alert.props.msg = '%s' % e
         else:

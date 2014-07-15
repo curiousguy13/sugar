@@ -25,7 +25,7 @@ from gi.repository import Gio
 from gi.repository import GLib
 from gi.repository import Gtk
 from gi.repository import Gdk
-import cPickle
+import pickle
 import xapian
 import json
 import tempfile
@@ -92,7 +92,7 @@ def _convert_entries(root):
     for posting_item in database.postlist(''):
         try:
             document = database.get_document(posting_item.docid)
-        except xapian.DocNotFoundError, e:
+        except xapian.DocNotFoundError as e:
             logging.debug('Convert DS-0 Journal entries: error getting '
                           'document %s: %s', posting_item.docid, e)
             continue
@@ -101,8 +101,8 @@ def _convert_entries(root):
 
 def _convert_entry(root, document):
     try:
-        metadata_loaded = cPickle.loads(document.get_data())
-    except cPickle.PickleError, e:
+        metadata_loaded = pickle.loads(document.get_data())
+    except pickle.PickleError as e:
         logging.debug('Convert DS-0 Journal entries: '
                       'error converting metadata: %s', e)
         return
@@ -118,7 +118,7 @@ def _convert_entry(root, document):
     if uid is None:
         return
 
-    for key, value in metadata_loaded.items():
+    for key, value in list(metadata_loaded.items()):
         metadata[str(key)] = str(value[0])
 
     if 'uid' not in metadata:
@@ -307,7 +307,7 @@ class BaseButton(RadioToolButton):
 
         try:
             model.copy(metadata, self.mount_point)
-        except IOError, e:
+        except IOError as e:
             logging.exception('Error while copying the entry. %s', e.strerror)
             self.emit('volume-error',
                       _('Error while copying the entry. %s') % e.strerror,

@@ -293,7 +293,7 @@ class APIServer(object):
         os.environ["SUGAR_APISOCKET_KEY"] = self._key
 
     def _open_stream(self, client, request):
-        for stream_id in xrange(0, 255):
+        for stream_id in range(0, 255):
             if stream_id not in client.stream_monitors:
                 client.stream_monitors[stream_id] = StreamMonitor()
                 break

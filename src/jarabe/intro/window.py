@@ -21,7 +21,7 @@ from gettext import gettext as _
 import pwd
 import time
 import math
-import commands
+import subprocess
 
 from gi.repository import Gtk
 from gi.repository import Gdk
@@ -114,7 +114,7 @@ def create_profile(user_profile):
     logging.debug("Generating user keypair")
 
     cmd = "ssh-keygen -q -t dsa -f %s -C '' -N ''" % (keypath, )
-    (s, o) = commands.getstatusoutput(cmd)
+    (s, o) = subprocess.getstatusoutput(cmd)
     if s != 0:
         logging.error('Could not generate key pair: %d %s', s, o)
 
@@ -392,9 +392,9 @@ class _IntroBox(Gtk.VBox):
             self._setup_page()
 
     def _next_activated_cb(self, widget):
-        self.next()
+        next(self)
 
-    def next(self):
+    def __next__(self):
         if self._page == self.PAGE_LAST:
             self.done()
         if self._current_page.props.valid:
@@ -455,7 +455,7 @@ class IntroWindow(Gtk.Window):
 
     def __key_press_cb(self, widget, event):
         if Gdk.keyval_name(event.keyval) == 'Return':
-            self._intro_box.next()
+            next(self._intro_box)
             return True
         elif Gdk.keyval_name(event.keyval) == 'Escape':
             self._intro_box.back()

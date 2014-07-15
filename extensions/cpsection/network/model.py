@@ -43,7 +43,7 @@ def get_jabber():
 
 
 def print_jabber():
-    print get_jabber()
+    print(get_jabber())
 
 
 def set_jabber(server):
@@ -70,7 +70,7 @@ def get_radio():
 
 
 def print_radio():
-    print ('off', 'on')[get_radio()]
+    print(('off', 'on')[get_radio()])
 
 
 def set_radio(state):
@@ -164,7 +164,7 @@ def get_publish_information():
 
 
 def print_publish_information():
-    print get_publish_information()
+    print(get_publish_information())
 
 
 def set_publish_information(value):

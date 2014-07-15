@@ -269,7 +269,7 @@ class AboutMe(SectionView):
 
         self._nick_entry.connect('changed', self.__nick_changed_cb)
 
-        for picker in self._pickers.values():
+        for picker in list(self._pickers.values()):
             picker.connect('color-changed', self.__color_changed_cb)
 
         self._female_picker.connect('gender-changed', self.__gender_changed_cb)
@@ -435,7 +435,7 @@ class AboutMe(SectionView):
         self._model.set_age(self._age)
 
     def _update_pickers(self, color):
-        for picker in self._pickers.values():
+        for picker in list(self._pickers.values()):
             picker.props.color = color
         self._female_picker.set_color(color, self._gender)
         self._male_picker.set_color(color, self._gender)
@@ -465,7 +465,7 @@ class AboutMe(SectionView):
             return False
         try:
             self._model.set_nick(widget.get_text())
-        except ValueError, detail:
+        except ValueError as detail:
             self._nick_alert.props.msg = detail
             self._nick_valid = False
             self._nick_alert.show()

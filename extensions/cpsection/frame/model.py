@@ -26,7 +26,7 @@ def get_corner_delay():
 
 
 def print_corner_delay():
-    print get_corner_delay()
+    print(get_corner_delay())
 
 
 def set_corner_delay(delay):
@@ -51,7 +51,7 @@ def get_edge_delay():
 
 
 def print_edge_delay():
-    print get_edge_delay()
+    print(get_edge_delay())
 
 
 def set_edge_delay(delay):

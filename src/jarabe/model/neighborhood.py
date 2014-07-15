@@ -301,11 +301,11 @@ class _Account(GObject.GObject):
                     'Connection.GetSelfHandle'))
             self.emit('connected')
         else:
-            for contact_handle, contact_id in self._buddy_handles.items():
+            for contact_handle, contact_id in list(self._buddy_handles.items()):
                 if contact_id is not None:
                     self.emit('buddy-removed', contact_id)
 
-            for room_handle, activity_id in self._activity_handles.items():
+            for room_handle, activity_id in list(self._activity_handles.items()):
                 self.emit('activity-removed', activity_id)
 
             self._buddy_handles = {}
@@ -402,7 +402,7 @@ class _Account(GObject.GObject):
 
         room_handle = 0
         home_activity_id = home_activity.get_activity_id()
-        for handle, activity_id in self._activity_handles.items():
+        for handle, activity_id in list(self._activity_handles.items()):
             if home_activity_id == activity_id:
                 room_handle = handle
                 break
@@ -437,7 +437,7 @@ class _Account(GObject.GObject):
 
     def __presences_changed_cb(self, presences):
         logging.debug('_Account.__presences_changed_cb %r', presences)
-        for handle, presence in presences.iteritems():
+        for handle, presence in presences.items():
             if handle in self._buddy_handles:
                 presence_type, status_, message_ = presence
                 if presence_type == CONNECTION_PRESENCE_TYPE_OFFLINE:
@@ -613,9 +613,9 @@ class _Account(GObject.GObject):
 
     def __get_contact_attributes_cb(self, attributes):
         logging.debug('_Account.__get_contact_attributes_cb %r',
-                      attributes.keys())
+                      list(attributes.keys()))
 
-        for handle in attributes.keys():
+        for handle in list(attributes.keys()):
             nick = attributes[handle][CONNECTION_INTERFACE_ALIASING + '/alias']
 
             if handle == self._self_handle:
@@ -1068,16 +1068,16 @@ class Neighborhood(GObject.GObject):
         self._activities[activity_id].remove_buddy(self._buddies[contact_id])
 
     def get_buddies(self):
-        return self._buddies.values()
+        return list(self._buddies.values())
 
     def get_buddy_by_key(self, key):
-        for buddy in self._buddies.values():
+        for buddy in list(self._buddies.values()):
             if buddy.key == key:
                 return buddy
         return None
 
     def get_buddy_by_handle(self, contact_handle):
-        for buddy in self._buddies.values():
+        for buddy in list(self._buddies.values()):
             if not buddy.is_owner() and buddy.handle == contact_handle:
                 return buddy
         return None
@@ -1086,13 +1086,13 @@ class Neighborhood(GObject.GObject):
         return self._activities.get(activity_id, None)
 
     def get_activity_by_room(self, room_handle):
-        for activity in self._activities.values():
+        for activity in list(self._activities.values()):
             if activity.room_handle == room_handle:
                 return activity
         return None
 
     def get_activities(self):
-        return self._activities.values()
+        return list(self._activities.values())
 
 
 def get_model():

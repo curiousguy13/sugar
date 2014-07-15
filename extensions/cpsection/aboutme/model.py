@@ -44,7 +44,7 @@ def get_nick():
 
 
 def print_nick():
-    print get_nick()
+    print(get_nick())
 
 
 def set_nick(nick):
@@ -53,8 +53,8 @@ def set_nick(nick):
     """
     if not nick:
         raise ValueError(_('You must enter a name.'))
-    if not isinstance(nick, unicode):
-        nick = unicode(nick, 'utf-8')
+    if not isinstance(nick, str):
+        nick = str(nick, 'utf-8')
     settings = Gio.Settings('org.sugarlabs.user')
     settings.set_string('nick', nick)
 
@@ -84,14 +84,14 @@ def print_color():
                 fill_tuple = (color, hue)
 
     if stroke_tuple is not None:
-        print _('stroke:   color=%s hue=%s') % (stroke_tuple[0],
-                                                stroke_tuple[1])
+        print(_('stroke:   color=%s hue=%s') % (stroke_tuple[0],
+                                                stroke_tuple[1]))
     else:
-        print _('stroke:   %s') % (tmp[0])
+        print(_('stroke:   %s') % (tmp[0]))
     if fill_tuple is not None:
-        print _('fill:     color=%s hue=%s') % (fill_tuple[0], fill_tuple[1])
+        print(_('fill:     color=%s hue=%s') % (fill_tuple[0], fill_tuple[1]))
     else:
-        print _('fill:     %s') % (tmp[1])
+        print(_('fill:     %s') % (tmp[1]))
 
 
 def set_color(stroke, fill, stroke_modifier='medium', fill_modifier='medium'):
@@ -103,10 +103,10 @@ def set_color(stroke, fill, stroke_modifier='medium', fill_modifier='medium'):
     """
 
     if stroke_modifier not in _MODIFIERS or fill_modifier not in _MODIFIERS:
-        print (_('Error in specified color modifiers.'))
+        print((_('Error in specified color modifiers.')))
         return
     if stroke not in _COLORS or fill not in _COLORS:
-        print (_('Error in specified colors.'))
+        print((_('Error in specified colors.')))
         return
 
     if stroke_modifier == fill_modifier:
@@ -153,7 +153,7 @@ def get_gender():
 
 
 def print_gender():
-    print get_gender()
+    print(get_gender())
 
 
 def set_gender(gender):
@@ -191,7 +191,7 @@ def get_age():
 
 
 def print_age():
-    print get_age()
+    print(get_age())
 
 
 def set_age(age):
@@ -201,7 +201,7 @@ def set_age(age):
     """
     try:
         i = int(age)
-    except ValueError, e:
+    except ValueError as e:
         logging.error('set_age: %s' % (e))
         i = None
 

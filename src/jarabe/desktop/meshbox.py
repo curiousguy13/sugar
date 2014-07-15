@@ -163,7 +163,7 @@ class ActivityView(SnowflakeLayout):
             self._icon.alpha = _FILTERED_ALPHA
         else:
             self._icon.alpha = 1.0
-        for icon in self._icons.itervalues():
+        for icon in self._icons.values():
             if hasattr(icon, 'set_filter'):
                 icon.set_filter(query)
 
@@ -281,7 +281,7 @@ class NetworkManagerObserver(object):
                                  'SpecificObject')
                 found = False
                 if ap_o != '/':
-                    for net in self._box.wireless_networks.values():
+                    for net in list(self._box.wireless_networks.values()):
                         if net.find_ap(ap_o) is not None:
                             found = True
                             net.create_keydialog(kwargs['response'])
@@ -528,7 +528,7 @@ class MeshBox(ViewContainer):
 
         # we don't keep an index of ap object path to network, but since
         # we'll only ever have a handful of networks, just try them all...
-        for net in self.wireless_networks.values():
+        for net in list(self.wireless_networks.values()):
             ap = net.find_ap(ap_o)
             if not ap:
                 continue
@@ -577,7 +577,7 @@ class MeshBox(ViewContainer):
 
         # the OLPC mesh can be recognised as a "normal" wifi network. remove
         # any such normal networks if they have been created
-        for hash_value, net in self.wireless_networks.iteritems():
+        for hash_value, net in self.wireless_networks.items():
             if not net.is_olpc_mesh():
                 continue
 
@@ -596,13 +596,13 @@ class MeshBox(ViewContainer):
     def suspend(self):
         if not self._suspended:
             self._suspended = True
-            for net in self.wireless_networks.values() + self._mesh:
+            for net in list(self.wireless_networks.values()) + self._mesh:
                 net.props.paused = True
 
     def resume(self):
         if self._suspended:
             self._suspended = False
-            for net in self.wireless_networks.values() + self._mesh:
+            for net in list(self.wireless_networks.values()) + self._mesh:
                 net.props.paused = False
 
     def _toolbar_query_changed_cb(self, toolbar, query):

@@ -198,7 +198,7 @@ class WirelessNetworkView(EventPulsingIcon):
         if self._mode == network.NM_802_11_MODE_ADHOC and \
                 network.is_sugar_adhoc_network(self._ssid):
             channel = max([1] + [ap.channel for ap in
-                                 self._access_points.values()])
+                                 list(self._access_points.values())])
             if self._device_state == network.NM_DEVICE_STATE_ACTIVATED and \
                     self._active_ap is not None:
                 icon_name = 'network-adhoc-%s-connected' % channel
@@ -273,7 +273,7 @@ class WirelessNetworkView(EventPulsingIcon):
             self.props.alpha = 1.0
 
     def __disconnect_activate_cb(self, item):
-        ap_paths = self._access_points.keys()
+        ap_paths = list(self._access_points.keys())
         network.disconnect_access_points(ap_paths)
 
     def _add_ciphers_from_flags(self, flags, pairwise):
@@ -395,7 +395,7 @@ class WirelessNetworkView(EventPulsingIcon):
             # display the strength of the strongest AP that makes up this
             # network, also considering that there may be no APs
             new_strength = max([0] + [ap.strength for ap in
-                                      self._access_points.values()])
+                                      list(self._access_points.values())])
 
         if new_strength != self._strength:
             self._strength = new_strength
@@ -423,14 +423,14 @@ class WirelessNetworkView(EventPulsingIcon):
         return self._access_points[ap_path]
 
     def get_first_ap(self):
-        return self._access_points.values()[0]
+        return list(self._access_points.values())[0]
 
     def is_olpc_mesh(self):
         return self._mode == network.NM_802_11_MODE_ADHOC \
             and self._ssid == 'olpc-mesh'
 
     def remove_all_aps(self):
-        for ap in self._access_points.values():
+        for ap in list(self._access_points.values()):
             ap.disconnect()
         self._access_points = {}
         self._active_ap = None

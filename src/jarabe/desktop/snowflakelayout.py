@@ -38,7 +38,7 @@ class SnowflakeLayout(Gtk.Container):
     def do_realize(self):
         self.set_realized(True)
         self.set_window(self.get_parent_window())
-        for child in self._children.keys():
+        for child in list(self._children.keys()):
             child.set_parent_window(self.get_parent_window())
         self.queue_resize()
 
@@ -48,7 +48,7 @@ class SnowflakeLayout(Gtk.Container):
         child.set_parent(self)
 
     def do_forall(self, include_internals, callback):
-        for child in self._children.keys():
+        for child in list(self._children.keys()):
             callback(child)
 
     def do_remove(self, child):
@@ -92,7 +92,7 @@ class SnowflakeLayout(Gtk.Container):
         r = self._get_radius()
         index = 0
 
-        for child, centered in self._children.items():
+        for child, centered in list(self._children.items()):
             child_request = child.size_request()
             child_width, child_height = \
                 child_request.width, child_request.height
@@ -125,7 +125,7 @@ class SnowflakeLayout(Gtk.Container):
 
     def _get_radius(self):
         radius = int(_BASE_DISTANCE + _CHILDREN_FACTOR * self._nflakes)
-        for child, centered in self._children.items():
+        for child, centered in list(self._children.items()):
             if centered:
                 child_request = child.size_request()
                 child_width, child_height = \
@@ -136,7 +136,7 @@ class SnowflakeLayout(Gtk.Container):
 
     def _calculate_size(self):
         thickness = 0
-        for child in self._children.keys():
+        for child in list(self._children.keys()):
             child_request = child.size_request()
             child_width, child_height = \
                 child_request.width, child_request.height

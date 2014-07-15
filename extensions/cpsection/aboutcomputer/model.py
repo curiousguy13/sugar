@@ -46,7 +46,7 @@ def get_aboutcomputer():
 
 
 def print_aboutcomputer():
-    print get_aboutcomputer()
+    print(get_aboutcomputer())
 
 
 def get_serial_number():
@@ -64,7 +64,7 @@ def print_serial_number():
     serial_no = get_serial_number()
     if serial_no is None:
         serial_no = _not_available
-    print serial_no
+    print(serial_no)
 
 
 def get_build_number():
@@ -77,7 +77,7 @@ def get_build_number():
         try:
             popen = subprocess.Popen(['lsb_release', '-ds'],
                                      stdout=subprocess.PIPE)
-        except OSError, e:
+        except OSError as e:
             if e.errno != errno.ENOENT:
                 raise
         else:
@@ -90,7 +90,7 @@ def get_build_number():
 
 
 def print_build_number():
-    print get_build_number()
+    print(get_build_number())
 
 
 def _parse_firmware_number(firmware_no):
@@ -140,7 +140,7 @@ def get_secondary_licenses():
 
 
 def print_firmware_number():
-    print get_firmware_number()
+    print(get_firmware_number())
 
 
 def _get_wireless_interfaces():
@@ -185,15 +185,15 @@ def get_wireless_firmware():
         return _not_available
 
     if len(firmware_info) == 1:
-        return firmware_info.values()[0]
+        return list(firmware_info.values())[0]
 
     return ', '.join(['%(interface)s: %(version)s' %
                       {'interface': interface, 'version': version}
-                      for interface, version in firmware_info.items()])
+                      for interface, version in list(firmware_info.items())])
 
 
 def print_wireless_firmware():
-    print get_wireless_firmware()
+    print(get_wireless_firmware())
 
 
 def _read_file(path):

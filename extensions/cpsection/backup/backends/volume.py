@@ -29,8 +29,8 @@ from sugar3 import env
 from sugar3 import profile
 from jarabe.journal import model
 
-from backend_tools import Backend, PreConditionsError, PreConditionsChoose
-from backend_tools import get_valid_file_name
+from .backend_tools import Backend, PreConditionsError, PreConditionsChoose
+from .backend_tools import get_valid_file_name
 
 DIR_SIZE = 4096
 DS_SOURCE_NAME = 'datastore'
@@ -210,7 +210,7 @@ class Restore(Backend):
             raise PreConditionsError(_('Not enough space in disk'))
 
     def _do_continue(self):
-        tarinfo = self._tarfile.next()
+        tarinfo = next(self._tarfile)
         if tarinfo is not None:
             self._tarfile.extract(tarinfo, path='/')
             self._bytes += DIR_SIZE if tarinfo.isdir() else tarinfo.size

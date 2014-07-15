@@ -90,7 +90,7 @@ def get_help_url_and_title(activity):
         _logger.error('helplink.json malformed, or can\'t be read')
 
     if links:
-        if link_id in links.keys():
+        if link_id in list(links.keys()):
             return (links[link_id], title)
 
     return None

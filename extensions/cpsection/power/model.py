@@ -56,7 +56,7 @@ def get_automatic_pm():
 
 
 def print_automatic_pm():
-    print ('off', 'on')[get_automatic_pm()]
+    print(('off', 'on')[get_automatic_pm()])
 
 
 def set_automatic_pm(enabled):

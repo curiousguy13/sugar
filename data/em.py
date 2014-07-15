@@ -39,11 +39,11 @@ import types
 
 try:
     # The equivalent of import cStringIO as StringIO.
-    import cStringIO
+    import io
     StringIO = cStringIO
     del cStringIO
 except ImportError:
-    import StringIO
+    import io
 
 # For backward compatibility, we can't assume these are defined.
 False, True = 0, 1
@@ -324,7 +324,7 @@ class MetaError(Exception):
         self.exc = exc
 
     def __str__(self):
-        backtrace = map(lambda x: str(x), self.contexts)
+        backtrace = [str(x) for x in self.contexts]
         return "%s: %s (%s)" % (self.exc.__class__, self.exc,
                                 (string.join(backtrace, ', ')))
 
@@ -417,7 +417,7 @@ class Stack:
 
     def filter(self, function):
         """Filter the elements of the stack through the function."""
-        self.data = filter(function, self.data)
+        self.data = list(filter(function, self.data))
 
     def purge(self):
         """Purge the stack."""
@@ -427,7 +427,7 @@ class Stack:
         """Create a duplicate of this stack."""
         return self.__class__(self.data[:])
 
-    def __nonzero__(self):
+    def __bool__(self):
         return len(self.data) != 0
 
     def __len__(self):
@@ -439,7 +439,7 @@ class Stack:
     def __repr__(self):
         return '<%s instance at 0x%x [%s]>' % \
                (self.__class__, id(self),
-                string.join(map(repr, self.data), ', '))
+                string.join(list(map(repr, self.data)), ', '))
 
 
 class AbstractFile:
@@ -456,7 +456,7 @@ class AbstractFile:
         self.mode = mode
         self.buffered = buffered
         if buffered:
-            self.bufferFile = StringIO.StringIO()
+            self.bufferFile = io.StringIO()
         else:
             self.bufferFile = theSubsystem.open(filename, mode)
         # Okay, we got this far, so the AbstractFile is initialized.
@@ -504,7 +504,7 @@ class Diversion:
     strings or (readable) file objects."""
 
     def __init__(self):
-        self.file = StringIO.StringIO()
+        self.file = io.StringIO()
 
     # These methods define the writable file-like interface for the
     # diversion.
@@ -530,7 +530,7 @@ class Diversion:
 
     def asFile(self):
         """Return the diversion as a file."""
-        return StringIO.StringIO(self.file.getvalue())
+        return io.StringIO(self.file.getvalue())
 
 
 class Stream:
@@ -575,9 +575,9 @@ class Stream:
             isinstance(shortcut, types.BuiltinMethodType) or \
                 isinstance(shortcut, types.LambdaType):
             return FunctionFilter(shortcut)
-        elif isinstance(shortcut, types.StringType):
+        elif isinstance(shortcut, bytes):
             return StringFilter(filter)
-        elif isinstance(shortcut, types.DictType):
+        elif isinstance(shortcut, dict):
             raise NotImplementedError("mapping filters not yet supported")
         else:
             # Presume it's a plain old filter.
@@ -591,7 +591,7 @@ class Stream:
         thisFilter, lastFilter = self.filter, None
         while thisFilter is not None and thisFilter is not self.file:
             lastFilter = thisFilter
-            thisFilter = thisFilter.next()
+            thisFilter = next(thisFilter)
         return lastFilter
 
     def install(self, shortcut=None):
@@ -603,7 +603,7 @@ class Stream:
             # Shortcuts for "no filter."
             self.filter = self.file
         else:
-            if type(shortcut) in (types.ListType, types.TupleType):
+            if type(shortcut) in (list, tuple):
                 shortcuts = list(shortcut)
             else:
                 shortcuts = [shortcut]
@@ -810,7 +810,7 @@ class Filter:
             raise NotImplementedError
         self.sink = None
 
-    def next(self):
+    def __next__(self):
         """Return the next filter/file-like object in the sequence, or None."""
         return self.sink
 
@@ -856,7 +856,7 @@ class Filter:
         this, last = self, self
         while this is not None:
             last = this
-            this = this.next()
+            this = next(this)
         return last
 
 
@@ -887,7 +887,7 @@ class StringFilter(Filter):
     filters any incoming data through it."""
 
     def __init__(self, table):
-        if not (isinstance(table, types.StringType) and len(table) == 256):
+        if not (isinstance(table, bytes) and len(table) == 256):
             raise FilterError("table must be 256-character string")
         Filter.__init__(self)
         self.table = table
@@ -1348,11 +1348,11 @@ class EscapeToken(ExpansionToken):
             elif code in 'u':  # Unicode 16-bit hex literal
                 theSubsystem.assertUnicode()
                 hexCode = scanner.chop(4)
-                result = unichr(string.atoi(hexCode, 16))
+                result = chr(string.atoi(hexCode, 16))
             elif code in 'U':  # Unicode 32-bit hex literal
                 theSubsystem.assertUnicode()
                 hexCode = scanner.chop(8)
-                result = unichr(string.atoi(hexCode, 16))
+                result = chr(string.atoi(hexCode, 16))
             elif code == 'v':  # VT
                 result = '\x0b'
             elif code == 'x':  # hexadecimal code
@@ -1720,7 +1720,7 @@ class ControlToken(ExpansionToken):
                     self.subrun(info[0][1], interpreter, locals)
                 except FlowError:
                     raise
-                except Exception, e:
+                except Exception as e:
                     for secondary, tokens in info[1:]:
                         exception, variable = interpreter.clause(
                             secondary.rest)
@@ -1761,7 +1761,7 @@ class ControlToken(ExpansionToken):
             token.run(interpreter, locals)
 
     def substring(self):
-        return string.join(map(str, self.subtokens), '')
+        return string.join(list(map(str, self.subtokens)), '')
 
     def string(self):
         if self.kind == 'primary':
@@ -1805,7 +1805,7 @@ class Scanner:
         self.buffer = data
         self.lock = 0
 
-    def __nonzero__(self):
+    def __bool__(self):
         return self.pointer < len(self.buffer)
 
     def __len__(self):
@@ -2332,7 +2332,7 @@ class Interpreter:
 
     def include(self, fileOrFilename, locals=None):
         """Do an include pass on a file or filename."""
-        if isinstance(fileOrFilename, types.StringType):
+        if isinstance(fileOrFilename, bytes):
             # Either it's a string representing a filename ...
             filename = fileOrFilename
             name = filename
@@ -2347,7 +2347,7 @@ class Interpreter:
 
     def expand(self, data, locals=None):
         """Do an explicit expansion on a subordinate stream."""
-        outFile = StringIO.StringIO()
+        outFile = io.StringIO()
         stream = Stream(outFile)
         self.invoke('beforeExpand', string=data, locals=locals)
         self.streams.push(stream)
@@ -2406,21 +2406,21 @@ class Interpreter:
         """Wrap around an application of a callable and handle errors.
         Return whether no error occurred."""
         try:
-            apply(callable, args)
+            callable(*args)
             self.reset()
             return True
-        except KeyboardInterrupt, e:
+        except KeyboardInterrupt as e:
             # Handle keyboard interrupts specially: we should always exit
             # from these.
             self.fail(e, True)
-        except Exception, e:
+        except Exception as e:
             # A standard exception (other than a keyboard interrupt).
             self.fail(e)
         except:
             # If we get here, then either it's an exception not derived from
             # Exception or it's a string exception, so get the error type
             # from the sys module.
-            e = sys.exc_type
+            e = sys.exc_info()[0]
             self.fail(e)
         # An error occurred if we leak through to here, so do cleanup.
         self.reset()
@@ -2609,7 +2609,7 @@ class Interpreter:
             raise ValueError("unpack tuple of wrong size")
         for i in range(len(names)):
             name = names[i]
-            if isinstance(name, types.StringType):
+            if isinstance(name, bytes):
                 self.atomic(name, values[i], locals)
             else:
                 self.multi(name, values[i], locals)
@@ -2620,7 +2620,7 @@ class Interpreter:
         left = self.tokenize(name)
         # The return value of tokenize can either be a string or a list of
         # (lists of) strings.
-        if isinstance(left, types.StringType):
+        if isinstance(left, bytes):
             self.atomic(left, value, locals)
         else:
             self.multi(left, value, locals)
@@ -2718,9 +2718,9 @@ class Interpreter:
             self.invoke('beforeExecute',
                         statements=statements, locals=locals)
             if locals is not None:
-                exec statements in self.globals, locals
+                exec(statements, self.globals, locals)
             else:
-                exec statements in self.globals
+                exec(statements, self.globals)
             self.invoke('afterExecute')
         finally:
             self.pop()
@@ -2734,9 +2734,9 @@ class Interpreter:
                         source=source, locals=locals)
             code = compile(source, '<single>', 'single')
             if locals is not None:
-                exec code in self.globals, locals
+                exec(code, self.globals, locals)
             else:
-                exec code in self.globals
+                exec(code, self.globals)
             self.invoke('afterSingle')
         finally:
             self.pop()
@@ -2768,7 +2768,7 @@ class Interpreter:
                 hook.push()
                 try:
                     method = getattr(hook, _name)
-                    apply(method, (), keywords)
+                    method(*(), **keywords)
                 finally:
                     hook.pop()
 
@@ -2927,7 +2927,7 @@ class Interpreter:
 
     def invokeHook(self, _name, **keywords):
         """Manually invoke a hook."""
-        apply(self.invoke, (_name,), keywords)
+        self.invoke(*(_name,), **keywords)
 
     # Callbacks.
 
@@ -2957,7 +2957,7 @@ class Interpreter:
         """Flatten the contents of the pseudo-module into the globals
         namespace."""
         if keys is None:
-            keys = self.__dict__.keys() + self.__class__.__dict__.keys()
+            keys = list(self.__dict__.keys()) + list(self.__class__.__dict__.keys())
         dict = {}
         for key in keys:
             # The pseudomodule is really a class instance, so we need to
@@ -3087,7 +3087,7 @@ class Processor:
         self.documents = {}
 
     def scan(self, basename, extensions=DEFAULT_EMPY_EXTENSIONS):
-        if isinstance(extensions, types.StringType):
+        if isinstance(extensions, bytes):
             extensions = (extensions,)
 
         def _noCriteria(x):
@@ -3390,7 +3390,7 @@ def invoke(args):
                                 _unicodeInputErrors, _unicodeOutputErrors)
     # Now initialize the output file if something has already been selected.
     if _output is not None:
-        _output = apply(AbstractFile, _output)
+        _output = AbstractFile(*_output)
     # Set up the main filename and the argument.
     if not remainder:
         remainder.append('-')
@@ -3400,7 +3400,7 @@ def invoke(args):
         raise ValueError("-b only makes sense with -o or -a arguments")
     if _prefix == 'None':
         _prefix = None
-    if _prefix and isinstance(_prefix, types.StringType) and len(_prefix) != 1:
+    if _prefix and isinstance(_prefix, bytes) and len(_prefix) != 1:
         raise Error("prefix must be single-character string")
     interpreter = Interpreter(output=_output,
                               argv=remainder,
@@ -3468,7 +3468,7 @@ def invoke(args):
     # Finally, if we should pause at the end, do it.
     if _pauseAtEnd:
         try:
-            raw_input()
+            input()
         except EOFError:
             pass
 

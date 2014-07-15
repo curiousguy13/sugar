@@ -117,7 +117,7 @@ class TelepathyClient(dbus.service.Object, DBusProperties):
                 channels=channels,
                 dispatch_operation_path=dispatch_operation_path,
                 properties=properties)
-        except Exception, e:
+        except Exception as e:
             logging.exception(e)
 
 

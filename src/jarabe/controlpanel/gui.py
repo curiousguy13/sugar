@@ -162,7 +162,7 @@ class ControlPanel(Gtk.Window):
             row = 0
             column = 2
 
-        options = self._options.keys()
+        options = list(self._options.keys())
         options.sort()
 
         for option in options:
@@ -409,12 +409,12 @@ class ModelWrapper(object):
         return getattr(self._module, name)
 
     def undo(self):
-        for key in self._options.keys():
+        for key in list(self._options.keys()):
             method = getattr(self._module, 'set_' + key, None)
             if method and self._options[key] is not None:
                 try:
                     method(self._options[key])
-                except Exception, detail:
+                except Exception as detail:
                     _logger.debug('Error undo option: %s', detail)
 
 

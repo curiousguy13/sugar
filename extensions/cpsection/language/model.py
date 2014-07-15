@@ -82,7 +82,7 @@ def _initialize():
 def _write_i18n(lang_env, language_env):
     path = os.path.join(os.environ.get('HOME'), '.i18n')
     if not os.access(path, os.W_OK):
-        print _standard_msg
+        print(_standard_msg)
         fd = open(path, 'w')
         fd.write('LANG="%s"\n' % _default_lang)
         fd.write('LANGUAGE="%s"\n' % _default_lang)
@@ -97,7 +97,7 @@ def _write_i18n(lang_env, language_env):
 def get_languages():
     path = os.path.join(os.environ.get('HOME', ''), '.i18n')
     if not os.access(path, os.R_OK):
-        print _standard_msg
+        print(_standard_msg)
         fd = open(path, 'w')
         fd.write('LANG="%s"\n' % _default_lang)
         fd.write('LANGUAGE="%s"\n' % _default_lang)
@@ -137,12 +137,12 @@ def print_languages():
         found_lang = False
         for lang in languages:
             if lang[2].split('.')[0] == code.split('.')[0]:
-                print lang[0].replace(' ', '_') + '/' + \
-                    lang[1].replace(' ', '_')
+                print(lang[0].replace(' ', '_') + '/' + \
+                    lang[1].replace(' ', '_'))
                 found_lang = True
                 break
         if not found_lang:
-            print (_('Language for code=%s could not be determined.') % code)
+            print((_('Language for code=%s could not be determined.') % code))
 
 
 def set_languages(languages):
@@ -165,7 +165,7 @@ def set_languages(languages):
             if code == languages:
                 set_languages_list([locale])
                 return 1
-        print (_("Sorry I do not speak \'%s\'.") % languages)
+        print((_("Sorry I do not speak \'%s\'.") % languages))
 
 
 def set_languages_list(languages):

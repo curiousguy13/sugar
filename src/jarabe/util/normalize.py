@@ -19,7 +19,7 @@ from unicodedata import normalize
 
 
 def normalize_string(unicode_string):
-    u"""Return unicode_string normalized for searching.
+    """Return unicode_string normalized for searching.
 
     >>> normalize_string(u'Mónica Viñao')
     'monica vinao'
