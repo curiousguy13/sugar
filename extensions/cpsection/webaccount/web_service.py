@@ -17,7 +17,7 @@
 
 class WebService():
     def get_icon_name(self):
-        raise "Not implemented"
+        raise exception("Not implemented")
 
     def config_service_cb(self, widget, event, container):
-        raise "Not implemented"
+        raise exception("Not implemented")
