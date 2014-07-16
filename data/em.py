@@ -1913,9 +1913,9 @@ class Scanner:
     def find(self, sub, start=0, end=None):
         """Find the next occurrence of the character, or return -1."""
         if end is not None:
-            return string.find(self.rest(), sub, start, end)
+            return self.rest().find(sub, start, end)
         else:
-            return string.find(self.rest(), sub, start)
+            return self.rest().find(sub, start)
 
     def last(self, char, start=0, end=None):
         """Find the first character that is _not_ the specified character."""
@@ -2472,7 +2472,7 @@ class Interpreter:
                 if self.options.get(BANGPATH_OPT, True) and self.prefix:
                     # Replace a bangpath at the beginning of the first line
                     # with an EmPy comment.
-                    if string.find(line, BANGPATH) == 0:
+                    if line.find(BANGPATH) == 0:
                         line = self.prefix + '#' + line[2:]
                 first = False
             if line:
@@ -2638,7 +2638,7 @@ class Interpreter:
         self.invoke('beforeClause', catch=catch, locals=locals)
         if catch is None:
             exceptionCode, variable = None, None
-        elif string.find(catch, ',') >= 0:
+        elif catch.find(',') >= 0:
             exceptionCode, variable = string.split(string.strip(catch), ',', 1)
             variable = string.strip(variable)
         else:
@@ -2707,11 +2707,11 @@ class Interpreter:
         # If there are any carriage returns (as opposed to linefeeds/newlines)
         # in the statements code, then remove them.  Even on DOS/Windows
         # platforms,
-        if string.find(statements, '\r') >= 0:
+        if statements.find('\r') >= 0:
             statements = string.replace(statements, '\r', '')
         # If there are no newlines in the statements code, then strip any
         # leading or trailing whitespace.
-        if string.find(statements, '\n') < 0:
+        if statements.find('\n') < 0:
             statements = string.strip(statements)
         self.push()
         try:
