@@ -37,16 +37,16 @@ import string
 import sys
 import types
 
-try:
+'''try:
     # The equivalent of import cStringIO as StringIO.
     import io
     StringIO = cStringIO
     del cStringIO
-except ImportError:
-    import io
+except ImportError:'''
+import io
 
 # For backward compatibility, we can't assume these are defined.
-False, True = 0, 1
+#False, True = 0, 1
 
 # Some basic defaults.
 FAILURE_CODE = 1
@@ -3418,7 +3418,7 @@ def invoke(args):
                 name = thing
             elif which == 'define':
                 command = interpreter.string
-                if string.find(thing, '=') >= 0:
+                if thing.find('=') >= 0:
                     target = '%s{%s}' % (_prefix, thing)
                 else:
                     target = '%s{%s = None}' % (_prefix, thing)
