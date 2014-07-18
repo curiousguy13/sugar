@@ -1912,6 +1912,7 @@ class Scanner:
 
     def find(self, sub, start=0, end=None):
         """Find the next occurrence of the character, or return -1."""
+        print("%poop:sugar/data/em.py/find1")
         if end is not None:
             return self.rest().find(sub, start, end)
         else:
@@ -3242,6 +3243,7 @@ Welcome to EmPy version %s.""" % (programName, __version__))
 def invoke(args):
     """Run a standalone instance of an EmPy interpeter."""
     # Initialize the options.
+    print("%poop:sugar/data/em.py/invoke1:args=",args)
     _output = None
     _options = {BUFFERED_OPT: environment(BUFFERED_ENV, False),
                 RAW_OPT: environment(RAW_ENV, False),
@@ -3304,6 +3306,7 @@ def invoke(args):
          'unicode-errors=',
          'unicode-input-errors=',
          'unicode-output-errors='])
+    print("%poop:sugar/data/em.py/invoke2")
     for option, argument in pairs:
         if option in ('-V', '--version'):
             sys.stderr.write("%s version %s\n" % (__program__, __version__))
@@ -3381,6 +3384,7 @@ def invoke(args):
             _unicodeInputErrors = argument
         elif option in ('--unicode-output-errors',):
             _unicodeOutputErrors = argument
+    print("%poop:sugar/data/em.py/invoke3")
     # Set up the Unicode subsystem if required.
     if _unicode or \
        _unicodeInputEncoding or _unicodeOutputEncoding or \
@@ -3388,13 +3392,16 @@ def invoke(args):
         theSubsystem.initialize(_unicodeInputEncoding,
                                 _unicodeOutputEncoding,
                                 _unicodeInputErrors, _unicodeOutputErrors)
+    print("%poop:sugar/data/em.py/invoke4")
     # Now initialize the output file if something has already been selected.
     if _output is not None:
         _output = AbstractFile(*_output)
     # Set up the main filename and the argument.
+    print("%poop:sugar/data/em.py/invoke5")
     if not remainder:
         remainder.append('-')
     filename, arguments = remainder[0], remainder[1:]
+    print("%poop:sugar/data/em.py/invoke6")
     # Set up the interpreter.
     if _options[BUFFERED_OPT] and _output is None:
         raise ValueError("-b only makes sense with -o or -a arguments")
@@ -3408,9 +3415,11 @@ def invoke(args):
                               pseudo=_pseudo,
                               options=_options,
                               hooks=_hooks)
+    print("%poop:sugar/data/em.py/invoke7")
     try:
         # Execute command-line statements.
         i = 0
+        print("%poop:sugar/data/em.py/invoke8:which=",which,"thing=",thing,"preprocessing=",_preprocessing)
         for which, thing in _preprocessing:
             if which == 'pre':
                 command = interpreter.file
@@ -3463,18 +3472,27 @@ def invoke(args):
         # If we're supposed to go interactive afterwards, do it.
         if _interactive:
             interpreter.interact()
+        print("%poop:sugar/data/em.py/invoke9")
     finally:
+        print("%poop:sugar/data/em.py/invoke10")
         interpreter.shutdown()
+        print("%poop:sugar/data/em.py/invoke10a")
     # Finally, if we should pause at the end, do it.
+    print("%poop:sugar/data/em.py/invoke10e")
     if _pauseAtEnd:
+        print("%poop:sugar/data/em.py/invoke10b")
         try:
+            print("%poop:sugar/data/em.py/invoke10c")
             input()
         except EOFError:
+            print("%poop:sugar/data/em.py/invoke10d")
             pass
-
+    print("%poop:sugar/data/em.py/invoke11")
 
 def main():
+    print("%poop:sugar/data/em.py/main")
     invoke(sys.argv[1:])
 
 if __name__ == '__main__':
+    print("%poop:sugar/data/em.py/__name__")
     main()
