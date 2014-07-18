@@ -1812,11 +1812,18 @@ class Scanner:
         return len(self.buffer) - self.pointer
 
     def __getitem__(self, index):
+        print("%poop:sugar/data/em.py/getitem_start")
+        if isinstance(index,slice):
+            return [self[i] for i in range(*index.indices(len(self)))]
+        
         return self.buffer[self.pointer + index]
 
     def __getslice__(self, start, stop):
+        print("%poop:sugar/data/em.py/getslice_start")
+        print("%poop:sugar/data/em.py/getslice1:self=",self,"start=",start,"stop",stop)
         if stop > len(self):
             stop = len(self)
+        print("%poop:sugar/data/em.py/getslice2:self=",self,"start=",start,"stop",stop)
         return self.buffer[self.pointer + start:self.pointer + stop]
 
     def advance(self, count=1):
@@ -1873,6 +1880,10 @@ class Scanner:
 
     def rest(self):
         """Get the remainder of the buffer."""
+        print("%poop:sugar/data/em.py/rest1:self=",self)
+        print("0",self[0])
+        print("1",self[1])
+        print(":",self[:])
         return self[:]
 
     def read(self, i=0, count=1):
@@ -1914,8 +1925,16 @@ class Scanner:
         """Find the next occurrence of the character, or return -1."""
         print("%poop:sugar/data/em.py/find1")
         if end is not None:
+            print("%poop:sugar/data/em.py/find2")
             return self.rest().find(sub, start, end)
         else:
+            print("%poop:sugar/data/em.py/find3")
+            print("%self=",self)
+            print("%self.rest()=",self.rest())
+            print("%poop:sugar/data/em.py/find4")
+            a=self.rest().find(sub, start)
+            print("%poop:sugar/data/em.py/find5")
+            print("%poop:sugar/data/em.py/find6:a=",a)
             return self.rest().find(sub, start)
 
     def last(self, char, start=0, end=None):
@@ -2078,30 +2097,37 @@ class Scanner:
 
     def one(self):
         """Parse and return one token, or None if the scanner is empty."""
+        print("%poop:sugar/data/em.py/one1")
         if not self:
             return None
         if not self.prefix:
             loc = -1
         else:
+            print("%poop:sugar/data/em.py/one11:self.prefix=",self.prefix)
             loc = self.find(self.prefix)
+            print("%poop:sugar/data/em.py/one12")
         if loc < 0:
             # If there's no prefix in the buffer, then set the location to
             # the end so the whole thing gets processed.
             loc = len(self)
+        print("%poop:sugar/data/em.py/one2")
         if loc == 0:
             # If there's a prefix at the beginning of the buffer, process
             # an expansion.
+            print("%poop:sugar/data/em.py/one3")
             prefix = self.chop(1)
             assert prefix == self.prefix
             first = self.chop(1)
             if first == self.prefix:
                 first = None
             for firsts, factory in self.TOKEN_MAP:
+                print("%poop:sugar/data/em.py/one4")
                 if firsts is None:
                     if first is None:
                         break
                 elif first in firsts:
                     break
+                
             else:
                 raise ParseError("unknown markup: %s%s" % (self.prefix, first))
             token = factory(self.prefix, first)
@@ -2114,9 +2140,11 @@ class Scanner:
                 raise
         else:
             # Process everything up to loc as a null token.
+            print("%poop:sugar/data/em.py/one5")
             data = self.chop(loc)
             token = NullToken(data)
         self.sync()
+        print("%poop:sugar/data/em.py/one_end")
         return token
 
 
@@ -2225,6 +2253,7 @@ class Interpreter:
 
     def ready(self):
         """Declare the interpreter ready for normal operations."""
+        print("%poop:sugar/data/em.py/ready1")
         self.invoke('atReady')
 
     def fix(self):
@@ -2406,9 +2435,13 @@ class Interpreter:
     def wrap(self, callable, args):
         """Wrap around an application of a callable and handle errors.
         Return whether no error occurred."""
+        print("%poop:sugar/data/em.py/wrap1")
         try:
+            print("%poop:sugar/data/em.py/wrap2:callable=",callable,"args=",args)
             callable(*args)
+            print("%poop:sugar/data/em.py/wrap3")
             self.reset()
+            print("%poop:sugar/data/em.py/wrap4")
             return True
         except KeyboardInterrupt as e:
             # Handle keyboard interrupts specially: we should always exit
@@ -2425,6 +2458,7 @@ class Interpreter:
             self.fail(e)
         # An error occurred if we leak through to here, so do cleanup.
         self.reset()
+        print("%poop:sugar/data/em.py/wrap_end")
         return False
 
     def interact(self):
@@ -2507,14 +2541,23 @@ class Interpreter:
 
     def string(self, data, name='<string>', locals=None):
         """Parse a string."""
+        print("%poop:sugar/data/em.py/string1")
         context = Context(name)
+        print("%poop:sugar/data/em.py/string2")
         self.contexts.push(context)
+        print("%poop:sugar/data/em.py/string3")
         self.invoke('beforeString', name=name, string=data, locals=locals)
+        print("%poop:sugar/data/em.py/string4")
         context.bump()
+        print("%poop:sugar/data/em.py/string5")
         scanner = Scanner(self.prefix, data)
+        print("%poop:sugar/data/em.py/string6")
         self.safe(scanner, True, locals)
+        print("%poop:sugar/data/em.py/string7")
         self.invoke('afterString')
+        print("%poop:sugar/data/em.py/string8")
         self.contexts.pop()
+        print("%poop:sugar/data/em.py/string_end")
 
     def safe(self, scanner, final=False, locals=None):
         """Do a protected parse.  Catch transient parse errors; if
@@ -2523,6 +2566,7 @@ class Interpreter:
         pending)."""
         try:
             self.parse(scanner, locals)
+            print("%poop:sugar/data/em.py/safe1")
         except TransientParseError:
             if final:
                 # If the buffer doesn't end with a newline, try tacking on
@@ -2536,14 +2580,20 @@ class Interpreter:
 
     def parse(self, scanner, locals=None):
         """Parse and run as much from this scanner as possible."""
+        print("%poop:sugar/data/em.py/parse1")
         self.invoke('atParse', scanner=scanner, locals=locals)
+        print("%poop:sugar/data/em.py/parse2")
         while True:
+            print("%poop:sugar/data/em.py/parse3:scanner",scanner)
             token = scanner.one()
+            print("%poop:sugar/data/em.py/parse4")
             if token is None:
                 break
             self.invoke('atToken', token=token)
+            print("%poop:sugar/data/em.py/parse5")
             token.run(self, locals)
-
+            print("%poop:sugar/data/em.py/parse6")
+        print("%poop:sugar/data/em.py/parse_end")
     # Medium-level evaluation and execution.
 
     def tokenize(self, name):
@@ -3416,22 +3466,36 @@ def invoke(args):
                               options=_options,
                               hooks=_hooks)
     print("%poop:sugar/data/em.py/invoke7")
+    print("%poop:sugar/data/em.py/invoke7a")
     try:
+        print("%poop:sugar/data/em.py/invoke7b")
         # Execute command-line statements.
+        print("%poop:sugar/data/em.py/invoke7c")
         i = 0
-        print("%poop:sugar/data/em.py/invoke8:which=",which,"thing=",thing,"preprocessing=",_preprocessing)
+        print("%poop:sugar/data/em.py/invoke7d")
+        print("%poop:sugar/data/em.py/invoke8a%preprocessing=",_preprocessing)
         for which, thing in _preprocessing:
+            print("%inside the loop")
+            print("%poop:sugar/data/em.py/invoke8b%preprocessing=",_preprocessing,"which=",which,"thing=",thing)
             if which == 'pre':
                 command = interpreter.file
                 target = theSubsystem.open(thing, 'r')
                 name = thing
             elif which == 'define':
+                print("%poop:sugar/data/em.py/invoke8ba")
                 command = interpreter.string
+                print("%poop:sugar/data/em.py/invoke8bb")
                 if thing.find('=') >= 0:
+                    print("%poop:sugar/data/em.py/invoke8bc")
                     target = '%s{%s}' % (_prefix, thing)
+                    print("%poop:sugar/data/em.py/invoke8bd")
                 else:
+                    print("%poop:sugar/data/em.py/invoke8be")
                     target = '%s{%s = None}' % (_prefix, thing)
+                    print("%poop:sugar/data/em.py/invoke8bf")
+                print("%poop:sugar/data/em.py/invoke8bg")
                 name = '<define:%d>' % i
+                print("%poop:sugar/data/em.py/invoke8bh")
             elif which == 'exec':
                 command = interpreter.string
                 target = '%s{%s}' % (_prefix, thing)
@@ -3446,10 +3510,15 @@ def invoke(args):
                 target = '%s{import %s}' % (_prefix, thing)
             else:
                 assert 0
+            print("%poop:sugar/data/em.py/invoke8bi")
             interpreter.wrap(command, (target, name))
+            print("%poop:sugar/data/em.py/invoke8bj")
             i = i + 1
+            print("%poop:sugar/data/em.py/invoke8bk")
+        print("%poop:sugar/data/em.py/invoke8c")
         # Now process the primary file.
         interpreter.ready()
+        print("%poop:sugar/data/em.py/invoke8d")
         if filename == '-':
             if not _interactive:
                 name = '<stdin>'
