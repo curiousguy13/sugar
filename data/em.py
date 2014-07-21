@@ -326,7 +326,7 @@ class MetaError(Exception):
     def __str__(self):
         backtrace = [str(x) for x in self.contexts]
         return "%s: %s (%s)" % (self.exc.__class__, self.exc,
-                                (string.join(backtrace, ', ')))
+                                (backtrace.join(', ')))
 
 
 class Subsystem:
@@ -439,7 +439,7 @@ class Stack:
     def __repr__(self):
         return '<%s instance at 0x%x [%s]>' % \
                (self.__class__, id(self),
-                string.join(list(map(repr, self.data)), ', '))
+                (list(map(repr, self.data))).join(', '))
 
 
 class AbstractFile:
@@ -893,7 +893,7 @@ class StringFilter(Filter):
         self.table = table
 
     def write(self, data):
-        self.sink.write(string.translate(data, self.table))
+        self.sink.write(data.translate(self.table))
 
 
 class BufferedFilter(Filter):
@@ -943,7 +943,7 @@ class LineBufferedFilter(BufferedFilter):
 
     def write(self, data):
         BufferedFilter.write(self, data)
-        chunks = string.split(self.buffer, '\n')
+        chunks = self.buffer.split('\n')
         for chunk in chunks[:-1]:
             self.sink.write(chunk + '\n')
         self.buffer = chunks[-1]
@@ -1269,7 +1269,8 @@ class ContextNameToken(ExpansionToken):
     def scan(self, scanner):
         loc = scanner.find('\n')
         if loc >= 0:
-            self.name = string.strip(scanner.chop(loc, 1))
+            print("%poop:sugar/data/em.py/ContextNameToken:scan1")
+            self.name = scanner.chop(loc, 1).strip()
         else:
             raise TransientParseError("context name expects newline")
 
@@ -1312,7 +1313,7 @@ class EscapeToken(ExpansionToken):
                 result = '\x08'
             elif code == 'd':  # decimal code
                 decimalCode = scanner.chop(3)
-                result = chr(string.atoi(decimalCode, 10))
+                result = chr(decimalCode.atoi(10))
             elif code == 'e':  # ESC
                 result = '\x1b'
             elif code == 'f':  # FF
@@ -1335,10 +1336,10 @@ class EscapeToken(ExpansionToken):
                         "unknown Unicode character name: %s" % name)
             elif code == 'o':  # octal code
                 octalCode = scanner.chop(3)
-                result = chr(string.atoi(octalCode, 8))
+                result = chr(octalCode.atoi(8))
             elif code == 'q':  # quaternary code
                 quaternaryCode = scanner.chop(4)
-                result = chr(string.atoi(quaternaryCode, 4))
+                result = chr(quaternaryCode.atoi(4))
             elif code == 'r':  # CR
                 result = '\x0d'
             elif code in 's ':  # SP
@@ -1348,20 +1349,20 @@ class EscapeToken(ExpansionToken):
             elif code in 'u':  # Unicode 16-bit hex literal
                 theSubsystem.assertUnicode()
                 hexCode = scanner.chop(4)
-                result = chr(string.atoi(hexCode, 16))
+                result = chr(hexCode.atoi(16))
             elif code in 'U':  # Unicode 32-bit hex literal
                 theSubsystem.assertUnicode()
                 hexCode = scanner.chop(8)
-                result = chr(string.atoi(hexCode, 16))
+                result = chr(hexCode.atoi(16))
             elif code == 'v':  # VT
                 result = '\x0b'
             elif code == 'x':  # hexadecimal code
                 hexCode = scanner.chop(2)
-                result = chr(string.atoi(hexCode, 16))
+                result = chr(hexCode.atoi(16))
             elif code == 'z':  # EOT
                 result = '\x04'
             elif code == '^':  # control character
-                controlCode = string.upper(scanner.chop(1))
+                controlCode = scanner.chop(1).upper()
                 if controlCode >= '@' and controlCode <= '`':
                     result = chr(ord(controlCode) - ord('@'))
                 elif controlCode == '?':
@@ -1395,7 +1396,8 @@ class SignificatorToken(ExpansionToken):
             # Work around a subtle CPython-Jython difference by stripping
             # the string before splitting it: 'a '.split(None, 1) has two
             # elements in Jython 2.1).
-            fields = string.split(string.strip(line), None, 1)
+            print("%poop:sugar/data/em.py/SignificatorToken:scan1")
+            fields = line.strip().split(None, 1)
             if len(fields) == 2 and fields[1] == '':
                 fields.pop()
             self.key = fields[0]
@@ -1408,7 +1410,8 @@ class SignificatorToken(ExpansionToken):
     def run(self, interpreter, locals):
         value = self.valueCode
         if value is not None:
-            value = interpreter.evaluate(string.strip(value), locals)
+            print("%poop:sugar/data/em.py/SignificatorToken:run1")
+            value = interpreter.evaluate(value.strip(), locals)
         interpreter.significate(self.key, value)
 
     def string(self):
@@ -1577,7 +1580,8 @@ class ControlToken(ExpansionToken):
         scanner.acquire()
         i = scanner.complex('[', ']', 0)
         self.contents = scanner.chop(i, 1)
-        fields = string.split(string.strip(self.contents), ' ', 1)
+        print("%poop:sugar/data/em.py/ControlToken:scan1")
+        fields = self.contents.strip().split(' ', 1)
         if len(fields) > 1:
             self.type, self.rest = fields
         else:
@@ -1638,6 +1642,7 @@ class ControlToken(ExpansionToken):
         return result
 
     def run(self, interpreter, locals):
+        print("%poop:sugar/data/em.py/controltoken:run1")
         interpreter.invoke('beforeControl', type=self.type, rest=self.rest,
                            locals=locals)
         if self.type == 'if':
@@ -1761,7 +1766,7 @@ class ControlToken(ExpansionToken):
             token.run(interpreter, locals)
 
     def substring(self):
-        return string.join(list(map(str, self.subtokens)), '')
+        return list(map(str, self.subtokens)).join('')
 
     def string(self):
         if self.kind == 'primary':
@@ -1813,11 +1818,18 @@ class Scanner:
 
     def __getitem__(self, index):
         print("%poop:sugar/data/em.py/getitem_start")
-        if isinstance(index,slice):
-            return [self[i] for i in range(*index.indices(len(self)))]
         
+        if isinstance(index,slice):
+            print("index=",index)
+            start=index.indices(len(self))[0]
+            stop=index.indices(len(self))[1]
+            print("indices=",index.indices(len(self))[1])
+            if stop > len(self):
+                stop = len(self)
+            return self.buffer[self.pointer + start:self.pointer + stop]
+       
         return self.buffer[self.pointer + index]
-
+    '''
     def __getslice__(self, start, stop):
         print("%poop:sugar/data/em.py/getslice_start")
         print("%poop:sugar/data/em.py/getslice1:self=",self,"start=",start,"stop",stop)
@@ -1825,7 +1837,7 @@ class Scanner:
             stop = len(self)
         print("%poop:sugar/data/em.py/getslice2:self=",self,"start=",start,"stop",stop)
         return self.buffer[self.pointer + start:self.pointer + stop]
-
+    '''
     def advance(self, count=1):
         """Advance the pointer count characters."""
         self.pointer = self.pointer + count
@@ -2123,13 +2135,17 @@ class Scanner:
             for firsts, factory in self.TOKEN_MAP:
                 print("%poop:sugar/data/em.py/one4")
                 if firsts is None:
+                    print("%poop:sugar/data/em.py/one4a")
                     if first is None:
+                        print("%poop:sugar/data/em.py/one4b")
                         break
                 elif first in firsts:
+                    print("%poop:sugar/data/em.py/one4c")
                     break
                 
             else:
                 raise ParseError("unknown markup: %s%s" % (self.prefix, first))
+            print("%poop:sugar/data/em.py/one4d")
             token = factory(self.prefix, first)
             try:
                 token.scan(self)
@@ -2405,7 +2421,7 @@ class Interpreter:
         except TransientParseError:
             pass
         result.append(data[i:])
-        result = string.join(result, '')
+        result = ''.join(result)
         self.invoke('afterQuote', result=result)
         return result
 
@@ -2426,7 +2442,7 @@ class Interpreter:
                 result.append(self.prefix + '\\' + char)
             else:
                 result.append(char)
-        result = string.join(result, '')
+        result = ''.join(result)
         self.invoke('afterEscape', result=result)
         return result
 
@@ -2602,7 +2618,8 @@ class Interpreter:
         result = []
         stack = [result]
         for garbage in self.ASSIGN_TOKEN_RE.split(name):
-            garbage = string.strip(garbage)
+            print("%poop:sugar/data/em.py/Interpreter:tokenize1")
+            garbage = garbage.strip()
             if garbage:
                 raise ParseError("unexpected assignment token: '%s'" % garbage)
         tokens = self.ASSIGN_TOKEN_RE.findall(name)
@@ -2690,10 +2707,12 @@ class Interpreter:
         if catch is None:
             exceptionCode, variable = None, None
         elif catch.find(',') >= 0:
-            exceptionCode, variable = string.split(string.strip(catch), ',', 1)
-            variable = string.strip(variable)
+            print("%poop:sugar/data/em.py/Interpreter:clause1")
+            exceptionCode, variable = (catch.strip()).split(',', 1)
+            variable = variable.strip()
         else:
-            exceptionCode, variable = string.strip(catch), None
+            print("%poop:sugar/data/em.py/Interpreter:clause1")
+            exceptionCode, variable = catch.strip(), None
         if not exceptionCode:
             exception = Exception
         else:
@@ -2759,11 +2778,12 @@ class Interpreter:
         # in the statements code, then remove them.  Even on DOS/Windows
         # platforms,
         if statements.find('\r') >= 0:
-            statements = string.replace(statements, '\r', '')
+            statements = statements.replace('\r', '')
         # If there are no newlines in the statements code, then strip any
         # leading or trailing whitespace.
         if statements.find('\n') < 0:
-            statements = string.strip(statements)
+            print("%poop:sugar/data/em.py/Interpreter:execute1")
+            statements = statements.strip()
         self.push()
         try:
             self.invoke('beforeExecute',
@@ -3188,7 +3208,8 @@ class Processor:
         match = self.SIGNIFICATOR_RE.search(line)
         if match:
             key, valueS = match.groups()
-            valueS = string.strip(valueS)
+            print("%poop:sugar/data/em.py/Interpreter:line1")
+            valueS = valueS.strip(valueS)
             if valueS:
                 value = eval(valueS)
             else:
@@ -3316,7 +3337,7 @@ def invoke(args):
     _pauseAtEnd = False
     _relativePath = False
     if _extraArguments is not None:
-        _extraArguments = string.split(_extraArguments)
+        _extraArguments = _extraArguments.split()
         args = _extraArguments + args
     # Parse the arguments.
     pairs, remainder = getopt.getopt(
@@ -3403,8 +3424,9 @@ def invoke(args):
         elif option in ('-P', '--preprocess'):
             _preprocessing.append(('pre', argument))
         elif option in ('-I', '--import'):
-            for module in string.split(argument, ','):
-                module = string.strip(module)
+            for module in argument.split(','):
+                print("%poop:sugar/data/em.py/Invoke")
+                module = module.strip()
                 _preprocessing.append(('import', module))
         elif option in ('-D', '--define'):
             _preprocessing.append(('define', argument))
